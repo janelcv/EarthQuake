@@ -20,8 +20,8 @@ function createMap(earthQuake) {
 
   // // Create the map object with options
   var myMap = L.map("map-id", {
-    center: [37.09, -95.71],
-    zoom: 4,
+    center: [51.48, 0.0077],
+    zoom: 2,
     layers: [lightmap, earthQuake]
   });
 
@@ -29,6 +29,35 @@ function createMap(earthQuake) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+// var colors =["#80ff00","#bfff00","#ffff00","#ffbf00", "#ff8000", "#ff4000"]
+// function getColor(colors) {
+//   for (var i = 0; i < colors.length; i++) {
+
+//   }
+//     return colors[i]
+// }
+
+
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (myMap) {
+
+    var div = L.DomUtil.create('div', 'info legend'),
+        grades = [0, 1, 2, 3, 4, 5],
+        labels = [];
+
+    // loop through our density intervals and generate a label with a colored square for each interval
+    for (var i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    }
+
+    return div;
+};
+
+legend.addTo(myMap);
 }
 
 
@@ -48,7 +77,7 @@ function createMarkers(response) {
 
     var lat = locations[i].geometry.coordinates[1];
     var lon = locations[i].geometry.coordinates[0]
-    var popUp = locations[i].properties.place
+    var popUp =  "<h3>" + locations[i].properties.place + "<h3><h3>Magnitude: " + locations[i].properties.mag + "<h3>"
     // console.log(lat)
     // console.log(lon)
     // console.log(popUp)
@@ -56,31 +85,31 @@ function createMarkers(response) {
 
     // For each station, create a marker and bind a popup with the station's name
     var color = "";
-    if (1.0 <= locations[i].properties.mag < 2.0) {
-      color = "yellow";
+    if (locations[i].properties.mag < 1.0) {
+      color = "#80ff00";
     }
-    else if (2.0 <= locations[i].properties.mag < 3.0) {
-      color = "blue";
+    else if (1.0 <= locations[i].properties.mag && locations[i].properties.mag < 2.0) {
+      color = "#bfff00";
     }
-    else if (3.0 <= locations[i].properties.mag < 4.0) {
-      color = "pink";
+    else if (2.0 <= locations[i].properties.mag && locations[i].properties.mag < 3.0) {
+      color = "#ffff00";
     }
-    else if (4.0 <= locations[i].properties.mag < 5.0) {
-      color = "red";
+    else if (3.0 <= locations[i].properties.mag && locations[i].properties.mag < 4.0) {
+      color = "#ffbf00";
     }
-    else if (locations[i].properties.mag >= 5.0) {
-      color = "orange";
+    else if (4.0 <= locations[i].properties.mag && locations[i].properties.mag < 5.0) {
+      color = "#ff8000";
     }
     else {
-      color = "black";
+      color = "#ff4000";
     }
-
+    
     
     var earthMarker = L.circle([lat, lon],{
       color: "black",
       fillColor: color,
       fillOpacity: 0.75,
-      radius: locations[i].properties.mag * 50000})
+      radius: locations[i].properties.mag * 20000})
     .bindPopup(popUp);
     
 
@@ -92,6 +121,8 @@ function createMarkers(response) {
   // // Create a layer group made from the bike markers array, pass it into the createMap function
   createMap(L.layerGroup(earthMarkers));
 }
+
+
 
 // Perform an API call  to get station information. Call createMarkers when complete
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson", createMarkers);
