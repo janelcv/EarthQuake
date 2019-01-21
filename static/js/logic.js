@@ -1,16 +1,32 @@
 function createMap(earthQuake) {
 
   // Create the tile layer that will be the background of our map
-  var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
-    attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
+  var darkmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+  attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+  maxZoom: 18,
+  id: "mapbox.dark",
+  accessToken: API_KEY
+});
+
+var satellitemap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+    attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
     maxZoom: 18,
-    id: "mapbox.light",
+    id: "mapbox.streets-satellite",
     accessToken: API_KEY
   });
 
+var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+  attribution: "Map data &copy; <a href=\"https://www.openstreetmap.org/\">OpenStreetMap</a> contributors, <a href=\"https://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"https://www.mapbox.com/\">Mapbox</a>",
+  maxZoom: 18,
+  id: "mapbox.comic",
+  accessToken: API_KEY
+});
+
   // Create a baseMaps object to hold the lightmap layer
   var baseMaps = {
-    "Light Map": lightmap
+    "Dark Map": darkmap,
+    "Satellite Map": satellitemap,
+    "Street Map": streetmap
   };
 
   // Create an overlayMaps object to hold the earthQuake layer
@@ -20,9 +36,9 @@ function createMap(earthQuake) {
 
   // // Create the map object with options
   var myMap = L.map("map-id", {
-    center: [51.48, 0.0077],
-    zoom: 2,
-    layers: [lightmap, earthQuake]
+    center: [37.77, -122.41],
+    zoom: 5,
+    layers: [ darkmap, satellitemap, streetmap, earthQuake]
   });
 
   // Create a layer control, pass in the baseMaps and overlayMaps. Add the layer control to the map
@@ -30,14 +46,9 @@ function createMap(earthQuake) {
     collapsed: false
   }).addTo(myMap);
 
-// var colors =["#80ff00","#bfff00","#ffff00","#ffbf00", "#ff8000", "#ff4000"]
-// function getColor(colors) {
-//   for (var i = 0; i < colors.length; i++) {
+legend.addTo(myMap);
 
-//   }
-//     return colors[i]
-// }
-
+}
 
 var legend = L.control({position: 'bottomright'});
 
@@ -50,29 +61,33 @@ legend.onAdd = function (myMap) {
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < grades.length; i++) {
         div.innerHTML +=
-            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+            '<i style="background:' + getColor(grades[i]+1) + '"></i> ' +
             grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
     }
 
     return div;
 };
 
-legend.addTo(myMap);
+function getColor(d) {
+  return d < 1.0 ? '#80ff00' :
+         d >= 1.0  && d < 2.0  ? '#bfff00' :
+         d >= 2.0  && d < 3.0  ? '#ffff00' :
+         d >= 3.0  && d < 4.0  ? '#ffbf00' :
+         d >= 4.0  && d < 5.0   ? '#ff8000' :
+                                  '#ff4000' ;
 }
-
-
 
 
 function createMarkers(response) {
   console.log(response)
 
-  // Pull the "stations" property off of response.data
+  // Pull the "locations" property off of response.data
   var locations = response.features;
   console.log(locations)
-  // Initialize an array to hold bike markers
+  // Initialize an array to hold markers
   var earthMarkers = [];
 
-  // Loop through the stations array
+  // Loop through the locations array
   for (var i = 0; i < locations.length; i++) {
 
     var lat = locations[i].geometry.coordinates[1];
@@ -83,124 +98,46 @@ function createMarkers(response) {
     // console.log(popUp)
     // console.log(locations[i].properties.mag)
 
-    // For each station, create a marker and bind a popup with the station's name
-    var color = "";
-    if (locations[i].properties.mag < 1.0) {
-      color = "#80ff00";
-    }
-    else if (1.0 <= locations[i].properties.mag && locations[i].properties.mag < 2.0) {
-      color = "#bfff00";
-    }
-    else if (2.0 <= locations[i].properties.mag && locations[i].properties.mag < 3.0) {
-      color = "#ffff00";
-    }
-    else if (3.0 <= locations[i].properties.mag && locations[i].properties.mag < 4.0) {
-      color = "#ffbf00";
-    }
-    else if (4.0 <= locations[i].properties.mag && locations[i].properties.mag < 5.0) {
-      color = "#ff8000";
-    }
-    else {
-      color = "#ff4000";
-    }
+    // // For each station, create a marker and bind a popup with the station's name
+    // var color = "";
+    // if (locations[i].properties.mag < 1.0) {
+    //   color = "#80ff00";
+    // }
+    // else if (1.0 <= locations[i].properties.mag && locations[i].properties.mag < 2.0) {
+    //   color = "#bfff00";
+    // }
+    // else if (2.0 <= locations[i].properties.mag && locations[i].properties.mag < 3.0) {
+    //   color = "#ffff00";
+    // }
+    // else if (3.0 <= locations[i].properties.mag && locations[i].properties.mag < 4.0) {
+    //   color = "#ffbf00";
+    // }
+    // else if (4.0 <= locations[i].properties.mag && locations[i].properties.mag < 5.0) {
+    //   color = "#ff8000";
+    // }
+    // else {
+    //   color = "#ff4000";
+    // }
     
     
     var earthMarker = L.circle([lat, lon],{
       color: "black",
-      fillColor: color,
-      fillOpacity: 0.75,
+      fillColor: getColor(locations[i].properties.mag),
+      fillOpacity: 0.5,
       radius: locations[i].properties.mag * 20000})
     .bindPopup(popUp);
     
 
-    // Add the marker to the bikeMarkers array
+    // Add the marker to the eathMarkers array
     earthMarkers.push(earthMarker);
     // console.log(earthMarkers)
   }
 
-  // // Create a layer group made from the bike markers array, pass it into the createMap function
+  // // Create a layer group made from the markers array, pass it into the createMap function
   createMap(L.layerGroup(earthMarkers));
 }
 
 
 
-// Perform an API call  to get station information. Call createMarkers when complete
-d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson", createMarkers);
-
-
-// // Perform a GET request to the query URL
-// d3.json(url, function(data) {
-//   // Once we get a response, send the data.features object to the createFeatures function
-//   console.log(data.features[2].geometry)
-//   console.log(data.features[1].properties.place)
-//   createFeatures(data.features);
-// });
-
-
-
-
-
-
-
-
-
-// function createMap(earthQuake) {
-
-//   // Create the tile layer that will be the background of our map
-//   var lightmap = L.tileLayer("https://api.mapbox.com/styles/v1/mapbox/light-v9/tiles/256/{z}/{x}/{y}?access_token={accessToken}", {
-//     attribution: "Map data &copy; <a href=\"http://openstreetmap.org\">OpenStreetMap</a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA</a>, Imagery © <a href=\"http://mapbox.com\">Mapbox</a>",
-//     maxZoom: 18,
-//     id: "mapbox.light",
-//     accessToken: API_KEY
-//   });
-
-//   // Create a baseMaps object to hold the lightmap layer
-//   var baseMaps = {
-//     "Light Map": lightmap
-//   };
-
-//   // Create an overlayMaps object to hold the earthQuake layer
-//   var overlayMaps = {
-//     "Bike Stations": earthQuake
-//   };
-
-//   // Create the map object with options
-//   var map = L.map("map-id", {
-//     center: [40.73, -74.0059],
-//     zoom: 12,
-//     layers: [lightmap, earthQuake]
-//   });
-
-//   // Create a layer control, pass in the baseMaps and overlayMaps. Add the layer control to the map
-//   L.control.layers(baseMaps, overlayMaps, {
-//     collapsed: false
-//   }).addTo(map);
-// }
-
-// function createMarkers(response) {
-
-//   // Pull the "stations" property off of response.data
-//   var stations = response.data.stations;
-
-//   // Initialize an array to hold bike markers
-//   var bikeMarkers = [];
-
-//   // Loop through the stations array
-//   for (var index = 0; index < stations.length; index++) {
-//     var station = stations[index];
-
-//     // For each station, create a marker and bind a popup with the station's name
-//     var bikeMarker = L.marker([station.lat, station.lon])
-//       .bindPopup("<h3>" + station.name + "<h3><h3>Capacity: " + station.capacity + "<h3>");
-
-//     // Add the marker to the bikeMarkers array
-//     bikeMarkers.push(bikeMarker);
-//   }
-
-//   // Create a layer group made from the bike markers array, pass it into the createMap function
-//   createMap(L.layerGroup(bikeMarkers));
-// }
-
-
-// // Perform an API call to the Citi Bike API to get station information. Call createMarkers when complete
-// d3.json("https://gbfs.citibikenyc.com/gbfs/en/station_information.json", createMarkers);
+// Perform an API call  to get location information. Call createMarkers when complete
+d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson", createMarkers);
