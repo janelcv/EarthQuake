@@ -22,6 +22,7 @@ var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
   accessToken: API_KEY
 });
 
+
   // Create a baseMaps object to hold the lightmap layer
   var baseMaps = {
     "Dark Map": darkmap,
@@ -31,6 +32,7 @@ var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
 
   // Create an overlayMaps object to hold the earthQuake layer
   var overlayMaps = {
+    "Earth Quake": earthQuake,
     "Earth Quake": earthQuake
   };
 
@@ -38,8 +40,9 @@ var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
   var myMap = L.map("map-id", {
     center: [37.77, -122.41],
     zoom: 5,
-    layers: [ darkmap, satellitemap, streetmap, earthQuake]
+    layers: [ darkmap, satellitemap, streetmap, earthQuake, earthQuake,]
   });
+  
 
   // Create a layer control, pass in the baseMaps and overlayMaps. Add the layer control to the map
   L.control.layers(baseMaps, overlayMaps, {
@@ -50,8 +53,12 @@ legend.addTo(myMap);
 
 }
 
-var legend = L.control({position: 'bottomright'});
+// Create a legend to display information about our map
+var legend = L.control({
+  position: 'bottomright'});
 
+
+// When the layer control is added, insert a div with the class of "legend"
 legend.onAdd = function (myMap) {
 
     var div = L.DomUtil.create('div', 'info legend'),
@@ -92,7 +99,7 @@ function createMarkers(response) {
 
     var lat = locations[i].geometry.coordinates[1];
     var lon = locations[i].geometry.coordinates[0]
-    var popUp =  "<h3>" + locations[i].properties.place + "<h3><h3>Magnitude: " + locations[i].properties.mag + "<h3>"
+    var popUp =  "<h3>" + locations[i].properties.title + "<h3>"
     // console.log(lat)
     // console.log(lon)
     // console.log(popUp)
@@ -129,15 +136,17 @@ function createMarkers(response) {
     
 
     // Add the marker to the eathMarkers array
-    earthMarkers.push(earthMarker);
+    earthMarkers.push(earthMarker)
     // console.log(earthMarkers)
   }
 
   // // Create a layer group made from the markers array, pass it into the createMap function
-  createMap(L.layerGroup(earthMarkers));
+  createMap(new L.layerGroup(earthMarkers));
 }
 
 
 
 // Perform an API call  to get location information. Call createMarkers when complete
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson", createMarkers);
+
+
