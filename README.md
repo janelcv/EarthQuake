@@ -15,6 +15,6 @@ Also users are able to choose between 2 options to be desiplayes on a map:
 
 #### Result
 It can be noticed from the map that a lot of earthquakes happen at the junction of tectonic plates.
-![FinalOutput](final_output1.png)
+![FinalOutput](final_output3.png)
 ![FinalOutput](final_output2.png)
-
+![FinalOutput](final_output1.png)
