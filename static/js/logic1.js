@@ -1,3 +1,4 @@
+function createMap(earthQuake) {
 
   // Create the tile layer that will be the background of our map
   var darkmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
@@ -30,25 +31,27 @@ var streetmap = L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.pn
   };
 
   // Create an overlayMaps object to hold the earthQuake layer
-  var earthQuake = new L.layerGroup();
-  var platesTectonic = new L.layerGroup();
   var overlayMaps = {
     "Earth Quake": earthQuake,
-    "Tectonic Plates": platesTectonic
+    "Earth Quake": earthQuake
   };
 
   // // Create the map object with options
   var myMap = L.map("map-id", {
     center: [37.77, -122.41],
     zoom: 5,
-    layers: [ darkmap, satellitemap, streetmap]
+    layers: [ darkmap, satellitemap, streetmap, earthQuake]
   });
   
 
   // Create a layer control, pass in the baseMaps and overlayMaps. Add the layer control to the map
-  L.control.layers(baseMaps, overlayMaps).addTo(myMap);
+  L.control.layers(baseMaps, overlayMaps, {
+    collapsed: false
+  }).addTo(myMap);
 
+legend.addTo(myMap);
 
+}
 
 // Create a legend to display information about our map
 var legend = L.control({
@@ -72,8 +75,6 @@ legend.onAdd = function (myMap) {
     return div;
 };
 
-legend.addTo(myMap);
-
 function getColor(d) {
   return d < 1.0 ? '#80ff00' :
          d >= 1.0  && d < 2.0  ? '#bfff00' :
@@ -85,11 +86,11 @@ function getColor(d) {
 
 
 function createMarkers(response) {
-  // console.log(response)
+  console.log(response)
 
   // Pull the "locations" property off of response.data
   var locations = response.features;
-  // console.log(locations)
+  console.log(locations)
   // Initialize an array to hold markers
   var earthMarkers = [];
 
@@ -140,9 +141,7 @@ function createMarkers(response) {
   }
 
   // // Create a layer group made from the markers array, pass it into the createMap function
-  var quakeLayer = new L.layerGroup(earthMarkers);
-  quakeLayer.addTo(earthQuake);
-  earthQuake.addTo(myMap);
+  createMap(new L.layerGroup(earthMarkers));
 }
 
 
@@ -151,44 +150,3 @@ function createMarkers(response) {
 d3.json("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson", createMarkers);
 
 
-function plateMarkers(response) {
-  // console.log(response)
-
-  // Pull the "locations" property off of response.data
-  var locations = response.features;
-//  console.log(locations)
-  // Initialize an array to hold markers
-  var plateMarkers = [];
-
-  // Loop through the locations array
-  for (var i = 0; i < locations.length; i++) {
-    var linePlate = locations[i].geometry.coordinates[0];
-    // console.log(linePlate)
-    var switchedLinePlate = [];
-    linePlate.forEach(function(x){
-      x0 = x[1];
-      x1 = x[0];
-      array_new = [x0,x1];
-      switchedLinePlate.push(array_new);
-    });
-    // console.log(switchedLinePlate)
-    var popUp =  "<h3>" + locations[i].properties.Name + "<h3><h3>Source: " + locations[i].properties.Source + "<h3>"
-    var plateMarker = L.polyline(switchedLinePlate,{
-      color: "yellow"})
-    
-
-    // Add the marker to the eathMarkers array
-    plateMarkers.push(plateMarker);
-    // console.log(earthMarkers)
-  }
-
-  // Create a layer group made from the markers array, pass it into the createMap function
-  var plateLayer = new L.layerGroup(plateMarkers);
-  plateLayer.addTo(platesTectonic);
-  platesTectonic.addTo(myMap);
-};
-
-
-
-// Perform an API call  to get location information. Call createMarkers when complete
-d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json", plateMarkers);
