@@ -129,7 +129,7 @@ function createMarkers(response) {
     var earthMarker = L.circle([lat, lon],{
       color: "black",
       fillColor: getColor(locations[i].properties.mag),
-      fillOpacity: 0.5,
+      fillOpacity: 0.7,
       radius: locations[i].properties.mag * 20000})
     .bindPopup(popUp);
     
@@ -174,7 +174,8 @@ function plateMarkers(response) {
     // console.log(switchedLinePlate)
     var popUp =  "<h3>" + locations[i].properties.Name + "<h3><h3>Source: " + locations[i].properties.Source + "<h3>"
     var plateMarker = L.polyline(switchedLinePlate,{
-      color: "yellow"})
+      color: "orange",
+      fillOpacity: 0.5,})
     
 
     // Add the marker to the eathMarkers array
