@@ -2,14 +2,15 @@
 
 #### Description
 
-[EarthQuake](https://github.com/janelcv/EarthQuake) is an interactive map which allows user to track the earthquakes happend for the last past week and the locations of the tectonic plates. 
+[EarthQuake](https://github.com/janelcv/EarthQuake) is an interactive map which allows user to track the earthquakes happend for the last past week and the locations of the tectonic plates.
+Interactive map offeres several options: 
 
 Users are able to switch between 3 different types of maps:
 1. Satellitemap
 2. Darkmap
 3. Streetmap
 
-Also users are able to choose between 2 options to be desiplayes on a map:
+Users are able to choose between 2 options to be displayed on a map:
 1.  Earthquakes
 2.  Tectonic Plates 
 
